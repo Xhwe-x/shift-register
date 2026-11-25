@@ -4,6 +4,7 @@ import type { Action, GameState, Level } from './types';
 export class ShiftSession {
   private history: GameState[] = [];
   private current: GameState;
+  private assisted = false;
 
   constructor(readonly level: Level) {
     this.current = createInitialState(level);
@@ -15,6 +16,14 @@ export class ShiftSession {
 
   get canUndo(): boolean {
     return this.history.length > 0;
+  }
+
+  get usedHint(): boolean {
+    return this.assisted;
+  }
+
+  useHint(): void {
+    this.assisted = true;
   }
 
   act(action: Action): void {
@@ -31,6 +40,7 @@ export class ShiftSession {
 
   restart(): void {
     this.history = [];
+    this.assisted = false;
     this.current = createInitialState(this.level);
   }
 }

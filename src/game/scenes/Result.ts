@@ -12,7 +12,7 @@ export class ResultScene extends ScreenScene {
     const screen = this.open();
     const { level, state } = session;
     const won = isWon(level, state);
-    const stars = starsFor(state.faults);
+    const stars = starsFor(state.faults, session.usedHint);
     const par = solveLevel(level, createInitialState(level))?.par;
 
     node(screen, 'p', level.name.toUpperCase(), 'machine-label');

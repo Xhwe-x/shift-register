@@ -1,0 +1,181 @@
+{
+  "id": 9,
+  "name": "Graveyard Shift",
+  "flavor": "The foreman asked for backup. The dream factory sent a smaller clipboard.",
+  "slots": 6,
+  "workers": [
+    {
+      "id": "w1",
+      "skill": "wrench"
+    },
+    {
+      "id": "w2",
+      "skill": "flame"
+    },
+    {
+      "id": "w3",
+      "skill": "feather"
+    },
+    {
+      "id": "w4",
+      "skill": "muscle"
+    },
+    {
+      "id": "w5",
+      "skill": "eye"
+    },
+    {
+      "id": "w6",
+      "skill": "flame"
+    }
+  ],
+  "beats": [
+    [
+      "eye",
+      "flame",
+      null,
+      null,
+      null,
+      "eye"
+    ],
+    [
+      "eye",
+      null,
+      "wrench",
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      "flame",
+      null,
+      "muscle",
+      null,
+      "muscle"
+    ],
+    [
+      null,
+      "flame",
+      "feather",
+      null,
+      "eye",
+      null
+    ],
+    [
+      "feather",
+      null,
+      "wrench",
+      null,
+      "muscle",
+      null
+    ],
+    [
+      "eye",
+      null,
+      null,
+      "wrench",
+      "feather",
+      "muscle"
+    ],
+    [
+      "eye",
+      null,
+      "feather",
+      null,
+      "feather",
+      null
+    ],
+    [
+      null,
+      "flame",
+      "wrench",
+      "feather",
+      null,
+      null
+    ],
+    [
+      "feather",
+      null,
+      "wrench",
+      null,
+      "muscle",
+      null
+    ],
+    [
+      "feather",
+      null,
+      "wrench",
+      "feather",
+      null,
+      null
+    ],
+    [
+      "feather",
+      "flame",
+      null,
+      "feather",
+      null,
+      null
+    ],
+    [
+      null,
+      "flame",
+      null,
+      "wrench",
+      "feather",
+      "muscle"
+    ]
+  ],
+  "rules": {
+    "pinned": [
+      1
+    ],
+    "overflow": true,
+    "reserve": [
+      {
+        "id": "r1",
+        "skill": "eye"
+      },
+      {
+        "id": "r2",
+        "skill": "muscle"
+      },
+      {
+        "id": "r3",
+        "skill": "feather"
+      },
+      {
+        "id": "r4",
+        "skill": "eye"
+      },
+      {
+        "id": "r5",
+        "skill": "wrench"
+      }
+    ],
+    "absences": [
+      {
+        "beat": 1,
+        "workerId": "w3"
+      },
+      {
+        "beat": 3,
+        "workerId": "r1"
+      },
+      {
+        "beat": 5,
+        "workerId": "w2"
+      },
+      {
+        "beat": 7,
+        "workerId": "r3"
+      },
+      {
+        "beat": 9,
+        "workerId": "w2"
+      }
+    ]
+  },
+  "allowedFaults": 3
+}

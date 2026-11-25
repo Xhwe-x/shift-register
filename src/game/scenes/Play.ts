@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
+import { synth } from '../../audio/synth';
 import { applyAction, isLost, isWon } from '../../core/rules';
 import { recordWin } from '../../core/progress';
 import { starsFor } from '../../core/scoring';
 import { ShiftSession } from '../../core/session';
-import type { Action, Beat, Crew, Level, Worker } from '../../core/types';
+import { solveLevel } from '../../core/solver';
+import type { Action, Beat, Crew, GameState, Level, Worker } from '../../core/types';
 import { tutorialLevel } from '../../levels';
 import { TouchButtons } from '../input';
 import type { Command } from '../input';
@@ -20,6 +22,14 @@ const columnStart = 218;
 const columnWidth = 676;
 const previewRows = [320, 263, 212] as const;
 
+interface TurnFrame {
+  readonly before: GameState;
+  readonly action: Action;
+  readonly progress: number;
+}
+
+const moveName: Record<Action, string> = { SHIFT_LEFT: 'Left', SHIFT_RIGHT: 'Right', WAIT: 'Wait' };
+
 export class PlayScene extends Phaser.Scene {
   private session = new ShiftSession(tutorialLevel);
   private board!: Phaser.GameObjects.Graphics;
@@ -30,6 +40,8 @@ export class PlayScene extends Phaser.Scene {
   private faultLabel!: Phaser.GameObjects.Text;
   private message!: HTMLElement;
   private report!: HTMLButtonElement;
+  private transition?: Phaser.Tweens.Tween;
+  private note = '';
 
   constructor() {
     super('Play');
@@ -41,6 +53,8 @@ export class PlayScene extends Phaser.Scene {
 
   init({ level, session }: { level?: Level; session?: ShiftSession }): void {
     this.session = session ?? new ShiftSession(level ?? tutorialLevel);
+    this.transition = undefined;
+    this.note = '';
   }
 
   create(): void {
@@ -71,7 +85,7 @@ export class PlayScene extends Phaser.Scene {
     this.controls = new TouchButtons(
       document.querySelector<HTMLElement>('#controls')!,
       (command) => this.onCommand(command),
-      (action) => this.draw(action),
+      (action) => { if (!this.transition) this.draw(action); },
       controller.signal,
     );
     this.status = document.querySelector<HTMLElement>('#turn-status')!;
@@ -80,7 +94,19 @@ export class PlayScene extends Phaser.Scene {
     document.querySelector<HTMLButtonElement>('#choose-shift')!.addEventListener(
       'click', () => this.scene.start('LevelSelect'), { signal: controller.signal },
     );
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => controller.abort());
+    const mute = document.querySelector<HTMLButtonElement>('#toggle-audio')!;
+    const updateMute = () => {
+      mute.textContent = synth.isMuted ? 'Unmute' : 'Mute';
+      mute.setAttribute('aria-pressed', String(synth.isMuted));
+    };
+    updateMute();
+    mute.addEventListener('click', () => { synth.setMuted(!synth.isMuted); updateMute(); }, { signal: controller.signal });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      controller.abort();
+      synth.setActive(false);
+    });
+    synth.setProgress(this.session.state.beatIndex / this.level.beats.length);
+    synth.setActive(true);
     this.draw();
     this.announce();
   }
@@ -99,6 +125,9 @@ export class PlayScene extends Phaser.Scene {
   }
 
   private onCommand(command: Command): void {
+    this.transition?.stop();
+    this.transition = undefined;
+    this.note = '';
     const before = this.session.state;
     switch (command) {
       case 'UNDO':
@@ -107,14 +136,47 @@ export class PlayScene extends Phaser.Scene {
       case 'RESTART':
         this.session.restart();
         break;
+      case 'HINT': {
+        if (isWon(this.level, before) || isLost(this.level, before)) break;
+        this.session.useHint();
+        const action = solveLevel(this.level, before)?.actions[0];
+        this.note = action ? 'Hint  /  ' + moveName[action] + ' next. This run is capped at 2 stars.'
+          : 'No winning move from here. Undo or restart to try another path.';
+        break;
+      }
       default:
         this.session.act(command);
     }
     const after = this.session.state;
-    if (after !== before && isWon(this.level, after)) {
+    const won = isWon(this.level, after);
+    const lost = isLost(this.level, after);
+    if (after !== before && won) {
       const progress = getProgress();
-      const next = recordWin(progress, this.level.id, { stars: starsFor(after.faults), faults: after.faults, shifts: after.shifts });
+      const next = recordWin(progress, this.level.id, { stars: starsFor(after.faults, this.session.usedHint), faults: after.faults, shifts: after.shifts });
       if (next !== progress) saveProgress(next);
+    }
+    synth.setProgress(after.beatIndex / this.level.beats.length);
+    synth.setActive(!won && !lost);
+    if (command !== 'UNDO' && command !== 'RESTART' && command !== 'HINT' && after !== before && after.lastResult) {
+      synth.turn(command, after.lastResult, won);
+      const fault = after.lastResult.faultSlots.length > 0;
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && (command !== 'WAIT' || fault)) {
+        if (fault) this.cameras.main.shake(170, 0.0027);
+        this.transition = this.tweens.addCounter({
+          from: 0,
+          to: 1,
+          duration: 205,
+          ease: 'Sine.easeInOut',
+          onUpdate: (tween) => this.draw(null, { before, action: command, progress: tween.getValue() ?? 1 }),
+          onComplete: () => {
+            this.transition = undefined;
+            this.draw();
+          },
+        });
+        this.draw(null, { before, action: command, progress: 0 });
+        this.announce();
+        return;
+      }
     }
     this.draw();
     this.announce();
@@ -122,6 +184,7 @@ export class PlayScene extends Phaser.Scene {
 
   private describe(): string {
     const { state } = this.session;
+    if (this.note) return this.note;
     if (isWon(this.level, state)) return 'Shift complete. ' + state.shifts + ' shifts, ' + state.faults + ' faults.';
     if (isLost(this.level, state)) return 'Shift failed. Undo or restart to try again.';
     if (!state.lastResult) {
@@ -151,13 +214,14 @@ export class PlayScene extends Phaser.Scene {
       : '');
   }
 
-  private draw(action: Action | null = null): void {
+  private draw(action: Action | null = null, frame?: TurnFrame): void {
     const { level, state } = this.session;
     const lost = isLost(level, state);
     const won = isWon(level, state);
     const active = !lost && !won;
     const projection = action && active ? applyAction(level, state, action) : null;
-    const demand = level.beats[active ? state.beatIndex : state.beatIndex - 1];
+    const shownBeat = frame?.before.beatIndex ?? (active ? state.beatIndex : state.beatIndex - 1);
+    const demand = level.beats[shownBeat];
     const crew = projection?.crew ?? state.crew;
     const g = this.board;
     g.clear();
@@ -185,18 +249,20 @@ export class PlayScene extends Phaser.Scene {
     }
 
     for (const [offset, y] of previewRows.entries()) {
-      const beat = active ? level.beats[state.beatIndex + offset] : offset === 0 ? demand : undefined;
-      this.drawBeat(beat, y, offset, crew, active ? state.beatIndex + offset : state.beatIndex - 1);
+      const beat = active || frame ? level.beats[shownBeat + offset] : offset === 0 ? demand : undefined;
+      this.drawBeat(beat, y, offset, crew, shownBeat + offset);
     }
 
-    const feedback = projection?.lastResult ?? (active ? null : state.lastResult);
+    const feedback = projection?.lastResult ?? (active && !frame ? null : state.lastResult);
     for (let slot = 0; slot < level.slots; slot += 1) {
-      const x = this.columnX(slot);
       const skill = demand?.[slot];
       const matched = feedback?.matchedSlots.includes(slot);
       const fault = feedback?.faultSlots.includes(slot);
+      const flash = fault && frame ? Math.sin(Math.PI * frame.progress) : 0;
+      const x = this.columnX(slot) + (fault && frame ? Math.sin(frame.progress * 7 * Math.PI) * 5 * flash : 0);
       const edge = fault ? 0xff8e96 : matched ? 0x61ebd2 : skill ? skillColors[skill] : border;
       g.fillStyle(0x192844).fillRoundedRect(x - 43, 374, 86, 66, 8);
+      if (flash > 0) g.fillStyle(0xa5254b, flash * 0.8).fillRoundedRect(x - 43, 374, 86, 66, 8);
       g.lineStyle(skill ? 2 : 1, edge).strokeRoundedRect(x - 43, 374, 86, 66, 8);
       g.fillStyle(0x0b152b).fillRoundedRect(x - 26, 385, 52, 44, 6);
       if (skill) drawBadge(g, skill, x, 407, 14);
@@ -208,7 +274,7 @@ export class PlayScene extends Phaser.Scene {
       }
     }
 
-    this.drawCrew(crew, active ? state.beatIndex : state.beatIndex - 1, active);
+    this.drawCrew(crew, shownBeat, active && !frame, frame);
     if (level.rules.overflow) this.drawReserve(projection?.reservePtr ?? state.reservePtr);
     this.controls.update(active, this.session.canUndo);
     this.report.hidden = active;
@@ -266,22 +332,61 @@ export class PlayScene extends Phaser.Scene {
     });
   }
 
-  private drawCrew(crew: Crew, beatIndex: number, active: boolean): void {
+  private drawCrew(crew: Crew, beatIndex: number, active: boolean, frame?: TurnFrame): void {
+    if (frame && frame.action !== 'WAIT') {
+      this.drawMovingCrew(crew, frame);
+      return;
+    }
     crew.forEach((worker, slot) => {
       if (!worker) return;
       const g = this.board;
       const x = this.columnX(slot);
-      g.fillStyle(0x233454).fillEllipse(x, 538, 68, 9);
-      g.fillStyle(0x34466b).fillRoundedRect(x - 23, 514, 46, 21, 6);
-      drawBadge(g, worker.skill, x, 501, 23);
-      g.fillStyle(0x0d1830).fillRoundedRect(x - 16, 513, 32, 15, 7);
-      g.fillStyle(0xecf5ff).fillCircle(x - 6, 520, 2).fillCircle(x + 6, 520, 2);
-      g.lineStyle(1, 0xecf5ff).lineBetween(x - 1, 524, x + 1, 524);
+      this.drawWorker(worker, x, 1);
       const off = this.offIn(worker, beatIndex);
       if (active && Number.isFinite(off)) {
         g.fillStyle(0x3b2e25).fillRoundedRect(x - 36, 533, 72, 21, 4);
         this.notices.add(this.label(x, 543, off === 0 ? 'OFF NOW' : 'OFF in ' + off, 13, '#f9d87a', true).setOrigin(0.5));
       }
     });
+  }
+
+  private drawMovingCrew(crew: Crew, { before, action, progress }: TurnFrame): void {
+    const left = columnStart + 9;
+    const right = columnStart + columnWidth - 9;
+    const leftward = action === 'SHIFT_LEFT';
+    const exit = leftward ? left : right;
+    const entrance = leftward ? right : left;
+    const lerp = Phaser.Math.Linear;
+
+    before.crew.forEach((worker, from) => {
+      if (!worker) return;
+      const start = this.columnX(from);
+      const to = crew.findIndex((candidate) => candidate?.id === worker.id);
+      if (to < 0) {
+        this.drawWorker(worker, lerp(start, exit, progress), 1 - progress);
+        return;
+      }
+      const end = this.columnX(to);
+      const wrapped = leftward ? to > from : to < from;
+      if (wrapped && progress < 0.5) this.drawWorker(worker, lerp(start, exit, progress * 2), 1 - progress * 2);
+      else if (wrapped) this.drawWorker(worker, lerp(entrance, end, progress * 2 - 1), progress * 2 - 1);
+      else this.drawWorker(worker, lerp(start, end, progress), 1);
+    });
+
+    crew.forEach((worker, to) => {
+      if (worker && !before.crew.some((candidate) => candidate?.id === worker.id)) {
+        this.drawWorker(worker, lerp(entrance, this.columnX(to), progress), progress);
+      }
+    });
+  }
+
+  private drawWorker(worker: Worker, x: number, alpha: number): void {
+    const g = this.board;
+    g.fillStyle(0x233454, alpha).fillEllipse(x, 538, 68, 9);
+    g.fillStyle(0x34466b, alpha).fillRoundedRect(x - 23, 514, 46, 21, 6);
+    drawBadge(g, worker.skill, x, 501, 23, alpha);
+    g.fillStyle(0x0d1830, alpha).fillRoundedRect(x - 16, 513, 32, 15, 7);
+    g.fillStyle(0xecf5ff, alpha).fillCircle(x - 6, 520, 2).fillCircle(x + 6, 520, 2);
+    g.lineStyle(1, 0xecf5ff, alpha).lineBetween(x - 1, 524, x + 1, 524);
   }
 }

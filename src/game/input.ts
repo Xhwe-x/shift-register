@@ -1,6 +1,6 @@
 import type { Action } from '../core/types';
 
-export type Command = Action | 'UNDO' | 'RESTART';
+export type Command = Action | 'UNDO' | 'RESTART' | 'HINT';
 
 const keyCommands = new Map<string, Command>([
   ['ShiftLeft', 'SHIFT_LEFT'],
@@ -15,6 +15,7 @@ const keyCommands = new Map<string, Command>([
   ['KeyZ', 'UNDO'],
   ['Backspace', 'UNDO'],
   ['KeyR', 'RESTART'],
+  ['KeyH', 'HINT'],
 ]);
 
 export class TouchButtons {
@@ -30,7 +31,7 @@ export class TouchButtons {
       const command = button.dataset.command as Command;
       this.buttons.set(command, button);
       button.addEventListener('click', () => onCommand(command), { signal });
-      if (command === 'UNDO' || command === 'RESTART') continue;
+      if (command === 'UNDO' || command === 'RESTART' || command === 'HINT') continue;
 
       button.addEventListener('pointerenter', (event) => {
         if (event.pointerType === 'mouse' && !button.disabled) onPreview(command);

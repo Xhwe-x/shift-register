@@ -1,10 +1,13 @@
 import Phaser from 'phaser';
+import { synth } from './audio/synth';
 import { BootScene } from './game/scenes/Boot';
 import { LevelSelectScene } from './game/scenes/LevelSelect';
 import { MenuScene } from './game/scenes/Menu';
 import { PlayScene } from './game/scenes/Play';
 import { ResultScene } from './game/scenes/Result';
 import './styles.css';
+
+synth.install();
 
 new Phaser.Game({
   type: Phaser.CANVAS,

@@ -1,0 +1,229 @@
+{
+  "id": 10,
+  "name": "Last Light",
+  "flavor": "The foreman finally clocked out. Nobody tell him it’s tomorrow.",
+  "slots": 6,
+  "workers": [
+    {
+      "id": "w1",
+      "skill": "eye"
+    },
+    {
+      "id": "w2",
+      "skill": "wrench"
+    },
+    {
+      "id": "w3",
+      "skill": "flame"
+    },
+    {
+      "id": "w4",
+      "skill": "feather"
+    },
+    {
+      "id": "w5",
+      "skill": "muscle"
+    },
+    {
+      "id": "w6",
+      "skill": "eye"
+    }
+  ],
+  "beats": [
+    [
+      "flame",
+      null,
+      "flame",
+      null,
+      null,
+      "muscle"
+    ],
+    [
+      "wrench",
+      null,
+      null,
+      "eye",
+      null,
+      "feather"
+    ],
+    [
+      "wrench",
+      "flame",
+      null,
+      null,
+      "wrench",
+      null
+    ],
+    [
+      null,
+      null,
+      "flame",
+      "eye",
+      "wrench",
+      "feather"
+    ],
+    [
+      "flame",
+      "eye",
+      null,
+      null,
+      "feather",
+      "feather"
+    ],
+    [
+      "flame",
+      null,
+      null,
+      null,
+      "feather",
+      null
+    ],
+    [
+      "eye",
+      "flame",
+      null,
+      "eye",
+      null,
+      null
+    ],
+    [
+      null,
+      "eye",
+      "flame",
+      null,
+      null,
+      "wrench"
+    ],
+    [
+      "muscle",
+      null,
+      null,
+      "flame",
+      "eye",
+      null
+    ],
+    [
+      null,
+      null,
+      "flame",
+      null,
+      "wrench",
+      null
+    ],
+    [
+      "eye",
+      "flame",
+      null,
+      "eye",
+      null,
+      "wrench"
+    ],
+    [
+      null,
+      "eye",
+      "flame",
+      "wrench",
+      "wrench",
+      null
+    ],
+    [
+      "flame",
+      "eye",
+      "flame",
+      "wrench",
+      null,
+      null
+    ],
+    [
+      null,
+      "eye",
+      "flame",
+      "wrench",
+      null,
+      null
+    ],
+    [
+      null,
+      "flame",
+      null,
+      "eye",
+      "wrench",
+      null
+    ],
+    [
+      null,
+      "flame",
+      "flame",
+      "eye",
+      "wrench",
+      "wrench"
+    ]
+  ],
+  "rules": {
+    "pinned": [
+      2
+    ],
+    "overflow": true,
+    "reserve": [
+      {
+        "id": "r1",
+        "skill": "flame"
+      },
+      {
+        "id": "r2",
+        "skill": "wrench"
+      },
+      {
+        "id": "r3",
+        "skill": "feather"
+      },
+      {
+        "id": "r4",
+        "skill": "eye"
+      },
+      {
+        "id": "r5",
+        "skill": "muscle"
+      },
+      {
+        "id": "r6",
+        "skill": "wrench"
+      }
+    ],
+    "absences": [
+      {
+        "beat": 2,
+        "workerId": "w3"
+      },
+      {
+        "beat": 3,
+        "workerId": "r1"
+      },
+      {
+        "beat": 5,
+        "workerId": "w3"
+      },
+      {
+        "beat": 7,
+        "workerId": "r3"
+      },
+      {
+        "beat": 9,
+        "workerId": "r4"
+      },
+      {
+        "beat": 10,
+        "workerId": "w3"
+      },
+      {
+        "beat": 12,
+        "workerId": "r5"
+      },
+      {
+        "beat": 14,
+        "workerId": "w3"
+      }
+    ]
+  },
+  "allowedFaults": 4
+}

@@ -11,8 +11,8 @@ export const skillColors: Record<Skill, number> = {
 
 type Point = readonly [number, number];
 
-export function drawBadge(g: Phaser.GameObjects.Graphics, skill: Skill, x: number, y: number, size: number): void {
-  g.fillStyle(skillColors[skill]);
+export function drawBadge(g: Phaser.GameObjects.Graphics, skill: Skill, x: number, y: number, size: number, alpha = 1): void {
+  g.fillStyle(skillColors[skill], alpha);
 
   switch (skill) {
     case 'eye':
@@ -32,7 +32,7 @@ export function drawBadge(g: Phaser.GameObjects.Graphics, skill: Skill, x: numbe
       break;
   }
 
-  drawIcon(g, skill, x, y + (skill === 'flame' ? size * 0.18 : 0), size * 0.6, 0x101a32);
+  drawIcon(g, skill, x, y + (skill === 'flame' ? size * 0.18 : 0), size * 0.6, 0x101a32, alpha);
 
   function polygon(points: readonly Point[]): void {
     g.fillPoints(points.map(([dx, dy]) => ({ x: x + dx * size, y: y + dy * size })), true);
@@ -40,10 +40,10 @@ export function drawBadge(g: Phaser.GameObjects.Graphics, skill: Skill, x: numbe
 }
 
 export function drawIcon(
-  g: Phaser.GameObjects.Graphics, skill: Skill, x: number, y: number, size: number, color: number,
+  g: Phaser.GameObjects.Graphics, skill: Skill, x: number, y: number, size: number, color: number, alpha = 1,
 ): void {
-  g.lineStyle(Math.max(1.5, size * 0.24), color);
-  g.fillStyle(color);
+  g.lineStyle(Math.max(1.5, size * 0.24), color, alpha);
+  g.fillStyle(color, alpha);
 
   function stroke(points: readonly Point[], closed = false): void {
     g.strokePoints(points.map(([dx, dy]) => ({ x: x + dx * size, y: y + dy * size })), closed);

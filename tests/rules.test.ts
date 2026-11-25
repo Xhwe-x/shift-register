@@ -91,4 +91,14 @@ describe('undo and restart', () => {
     expect(session.state).toEqual(createInitialState(tutorialLevel));
     expect(session.canUndo).toBe(false);
   });
+
+  it('keeps the hint cap across undo and clears it on restart', () => {
+    const session = new ShiftSession(tutorialLevel);
+    session.act('SHIFT_RIGHT');
+    session.useHint();
+    session.undo();
+    expect(session.usedHint).toBe(true);
+    session.restart();
+    expect(session.usedHint).toBe(false);
+  });
 });
