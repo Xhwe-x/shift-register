@@ -1,0 +1,95 @@
+{
+  "id": 4,
+  "name": "The Stubborn Station",
+  "flavor": "The foreman filed a complaint. Dave pinned that down too.",
+  "slots": 5,
+  "workers": [
+    {
+      "id": "w1",
+      "skill": "wrench"
+    },
+    {
+      "id": "w2",
+      "skill": "flame"
+    },
+    {
+      "id": "w3",
+      "skill": "feather"
+    },
+    {
+      "id": "w4",
+      "skill": "wrench"
+    },
+    {
+      "id": "w5",
+      "skill": "eye"
+    }
+  ],
+  "beats": [
+    [
+      "eye",
+      "flame",
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      "wrench",
+      null,
+      null
+    ],
+    [
+      "wrench",
+      null,
+      null,
+      "wrench",
+      null
+    ],
+    [
+      null,
+      "flame",
+      null,
+      "wrench",
+      null
+    ],
+    [
+      "feather",
+      null,
+      null,
+      null,
+      "wrench"
+    ],
+    [
+      "wrench",
+      null,
+      "eye",
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      "wrench",
+      null,
+      "wrench"
+    ],
+    [
+      null,
+      "flame",
+      null,
+      "eye",
+      null
+    ]
+  ],
+  "rules": {
+    "pinned": [
+      1
+    ],
+    "overflow": false,
+    "reserve": [],
+    "absences": []
+  },
+  "allowedFaults": 2
+}

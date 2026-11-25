@@ -11,15 +11,19 @@ export function createInitialState(level: Level): GameState {
   };
 }
 
-export function resolveBeat(crew: Crew, beat: Beat, beatIndex: number): BeatResult {
+export function resolveBeat(
+  crew: Crew, beat: Beat, beatIndex: number, absences: Level['rules']['absences'] = [],
+): BeatResult {
   const matchedSlots: number[] = [];
   const faultSlots: number[] = [];
   const idleSlots: number[] = [];
 
   beat.forEach((skill, slot) => {
+    const worker = crew[slot];
     if (skill === null) {
       idleSlots.push(slot);
-    } else if (crew[slot]?.skill === skill) {
+    } else if (worker?.skill === skill && !absences.some((absence) =>
+      absence.beat === beatIndex && absence.workerId === worker.id)) {
       matchedSlots.push(slot);
     } else {
       faultSlots.push(slot);
@@ -41,26 +45,38 @@ export function applyAction(level: Level, state: GameState, action: Action): Gam
   const beat = level.beats[state.beatIndex];
   if (!beat || isLost(level, state)) return state;
 
-  const nextCrew = action === 'WAIT' ? state.crew : rotate(level, state.crew, action);
+  const { crew, reservePtr } = action === 'WAIT' ? state : shiftCrew(level, state, action);
 
-  const lastResult = resolveBeat(nextCrew, beat, state.beatIndex);
+  const lastResult = resolveBeat(crew, beat, state.beatIndex, level.rules.absences);
   return {
     beatIndex: state.beatIndex + 1,
-    crew: nextCrew,
+    crew,
     faults: state.faults + lastResult.faultSlots.length,
     shifts: state.shifts + Number(action !== 'WAIT'),
-    reservePtr: state.reservePtr,
+    reservePtr,
     lastResult,
   };
 }
 
-function rotate(level: Level, crew: Crew, action: Exclude<Action, 'WAIT'>): Crew {
-  const indices = crew.flatMap((_, slot) => level.rules.pinned.includes(slot) ? [] : [slot]);
+function shiftCrew(level: Level, state: GameState, action: Exclude<Action, 'WAIT'>): Pick<GameState, 'crew' | 'reservePtr'> {
+  const { crew, reservePtr } = state;
+  const { pinned, overflow, reserve } = level.rules;
+  const indices = crew.flatMap((_, slot) => pinned.includes(slot) ? [] : [slot]);
+  if (indices.length === 0) return { crew, reservePtr };
+
   const movable = indices.map((slot) => crew[slot] ?? null);
+  const replacement = overflow ? reserve[reservePtr] ?? null : null;
+  if (action === 'SHIFT_LEFT') {
+    const outgoing = movable.shift() ?? null;
+    movable.push(overflow ? replacement : outgoing);
+  } else {
+    const outgoing = movable.pop() ?? null;
+    movable.unshift(overflow ? replacement : outgoing);
+  }
+
   const next = [...crew];
-  const delta = action === 'SHIFT_LEFT' ? 1 : -1;
   indices.forEach((slot, index) => {
-    next[slot] = movable[(index + delta + movable.length) % movable.length] ?? null;
+    next[slot] = movable[index] ?? null;
   });
-  return next;
+  return { crew: next, reservePtr: reservePtr + Number(replacement !== null) };
 }

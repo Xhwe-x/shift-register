@@ -1,0 +1,141 @@
+{
+  "id": 8,
+  "name": "Approved Leave",
+  "flavor": "Dave is on leave. His station does not know the difference.",
+  "slots": 6,
+  "workers": [
+    {
+      "id": "w1",
+      "skill": "wrench"
+    },
+    {
+      "id": "w2",
+      "skill": "flame"
+    },
+    {
+      "id": "w3",
+      "skill": "feather"
+    },
+    {
+      "id": "w4",
+      "skill": "muscle"
+    },
+    {
+      "id": "w5",
+      "skill": "eye"
+    },
+    {
+      "id": "w6",
+      "skill": "flame"
+    }
+  ],
+  "beats": [
+    [
+      "wrench",
+      "flame",
+      null,
+      null,
+      "eye",
+      null
+    ],
+    [
+      null,
+      "flame",
+      "flame",
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      "flame",
+      null,
+      null,
+      null,
+      "flame"
+    ],
+    [
+      "wrench",
+      null,
+      null,
+      null,
+      "eye",
+      "flame"
+    ],
+    [
+      "wrench",
+      null,
+      "muscle",
+      "flame",
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      "feather",
+      "muscle",
+      "eye",
+      null
+    ],
+    [
+      "wrench",
+      null,
+      "flame",
+      "feather",
+      null,
+      null
+    ],
+    [
+      null,
+      "flame",
+      "flame",
+      null,
+      null,
+      null
+    ],
+    [
+      "wrench",
+      null,
+      null,
+      null,
+      "eye",
+      "flame"
+    ],
+    [
+      null,
+      "flame",
+      null,
+      "muscle",
+      null,
+      "flame"
+    ]
+  ],
+  "rules": {
+    "pinned": [
+      0,
+      4
+    ],
+    "overflow": false,
+    "reserve": [],
+    "absences": [
+      {
+        "beat": 2,
+        "workerId": "w1"
+      },
+      {
+        "beat": 4,
+        "workerId": "w2"
+      },
+      {
+        "beat": 6,
+        "workerId": "w5"
+      },
+      {
+        "beat": 8,
+        "workerId": "w3"
+      }
+    ]
+  },
+  "allowedFaults": 3
+}

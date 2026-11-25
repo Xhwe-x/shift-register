@@ -1,0 +1,134 @@
+{
+  "id": 6,
+  "name": "Who Goes Home?",
+  "flavor": "The foreman tried to volunteer. The belt declined.",
+  "slots": 6,
+  "workers": [
+    {
+      "id": "w1",
+      "skill": "wrench"
+    },
+    {
+      "id": "w2",
+      "skill": "flame"
+    },
+    {
+      "id": "w3",
+      "skill": "feather"
+    },
+    {
+      "id": "w4",
+      "skill": "muscle"
+    },
+    {
+      "id": "w5",
+      "skill": "flame"
+    },
+    {
+      "id": "w6",
+      "skill": "eye"
+    }
+  ],
+  "beats": [
+    [
+      "flame",
+      null,
+      "muscle",
+      null,
+      null,
+      null
+    ],
+    [
+      "muscle",
+      null,
+      null,
+      null,
+      null,
+      "eye"
+    ],
+    [
+      null,
+      "muscle",
+      null,
+      "feather",
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      "feather",
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      "flame",
+      null,
+      null,
+      "flame"
+    ],
+    [
+      "muscle",
+      null,
+      "feather",
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      "feather",
+      "muscle",
+      null,
+      null,
+      null
+    ],
+    [
+      "flame",
+      null,
+      "muscle",
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      "flame",
+      null,
+      "muscle",
+      null,
+      null
+    ]
+  ],
+  "rules": {
+    "pinned": [],
+    "overflow": true,
+    "reserve": [
+      {
+        "id": "r1",
+        "skill": "eye"
+      },
+      {
+        "id": "r2",
+        "skill": "muscle"
+      },
+      {
+        "id": "r3",
+        "skill": "wrench"
+      },
+      {
+        "id": "r4",
+        "skill": "flame"
+      },
+      {
+        "id": "r5",
+        "skill": "feather"
+      }
+    ],
+    "absences": []
+  },
+  "allowedFaults": 3
+}

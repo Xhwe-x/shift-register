@@ -1,0 +1,110 @@
+{
+  "id": 7,
+  "name": "Called In Sick",
+  "flavor": "The sick note says ‘too many nightmares’. Fair enough.",
+  "slots": 5,
+  "workers": [
+    {
+      "id": "w1",
+      "skill": "wrench"
+    },
+    {
+      "id": "w2",
+      "skill": "flame"
+    },
+    {
+      "id": "w3",
+      "skill": "feather"
+    },
+    {
+      "id": "w4",
+      "skill": "flame"
+    },
+    {
+      "id": "w5",
+      "skill": "eye"
+    }
+  ],
+  "beats": [
+    [
+      "wrench",
+      null,
+      null,
+      null,
+      "eye"
+    ],
+    [
+      "eye",
+      null,
+      null,
+      null,
+      "flame"
+    ],
+    [
+      null,
+      "wrench",
+      null,
+      null,
+      "flame"
+    ],
+    [
+      null,
+      null,
+      "feather",
+      null,
+      "eye"
+    ],
+    [
+      null,
+      "feather",
+      "flame",
+      null,
+      null
+    ],
+    [
+      "wrench",
+      null,
+      null,
+      "flame",
+      null
+    ],
+    [
+      null,
+      "flame",
+      null,
+      "flame",
+      null
+    ],
+    [
+      "eye",
+      null,
+      null,
+      null,
+      "flame"
+    ]
+  ],
+  "rules": {
+    "pinned": [],
+    "overflow": false,
+    "reserve": [],
+    "absences": [
+      {
+        "beat": 1,
+        "workerId": "w2"
+      },
+      {
+        "beat": 2,
+        "workerId": "w2"
+      },
+      {
+        "beat": 4,
+        "workerId": "w5"
+      },
+      {
+        "beat": 6,
+        "workerId": "w1"
+      }
+    ]
+  },
+  "allowedFaults": 3
+}

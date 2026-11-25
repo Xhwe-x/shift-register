@@ -1,0 +1,78 @@
+{
+  "id": 5,
+  "name": "End of the Line",
+  "flavor": "The exit interview is conducted by gravity.",
+  "slots": 4,
+  "workers": [
+    {
+      "id": "w1",
+      "skill": "wrench"
+    },
+    {
+      "id": "w2",
+      "skill": "flame"
+    },
+    {
+      "id": "w3",
+      "skill": "feather"
+    },
+    {
+      "id": "w4",
+      "skill": "eye"
+    }
+  ],
+  "beats": [
+    [
+      "muscle",
+      null,
+      "flame",
+      null
+    ],
+    [
+      null,
+      "wrench",
+      "flame",
+      null
+    ],
+    [
+      "flame",
+      null,
+      null,
+      "flame"
+    ],
+    [
+      "flame",
+      "muscle",
+      null,
+      null
+    ],
+    [
+      null,
+      "wrench",
+      "flame",
+      null
+    ],
+    [
+      "muscle",
+      "wrench",
+      null,
+      null
+    ]
+  ],
+  "rules": {
+    "pinned": [],
+    "overflow": true,
+    "reserve": [
+      {
+        "id": "r1",
+        "skill": "muscle"
+      },
+      {
+        "id": "r2",
+        "skill": "flame"
+      }
+    ],
+    "absences": []
+  },
+  "allowedFaults": 2
+}

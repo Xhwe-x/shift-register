@@ -11,6 +11,18 @@ export interface Worker {
 
 export type Beat = readonly (Skill | null)[];
 
+export interface Absence {
+  readonly beat: number;
+  readonly workerId: string;
+}
+
+export interface LevelRules {
+  readonly pinned: readonly number[];
+  readonly overflow: boolean;
+  readonly reserve: readonly Worker[];
+  readonly absences: readonly Absence[];
+}
+
 export interface Level {
   readonly id: number;
   readonly name: string;
@@ -18,7 +30,7 @@ export interface Level {
   readonly slots: number;
   readonly workers: readonly Worker[];
   readonly beats: readonly Beat[];
-  readonly rules: { readonly pinned: readonly number[] };
+  readonly rules: LevelRules;
   readonly allowedFaults: number;
 }
 

@@ -46,6 +46,27 @@ export function parseLevel(value: unknown): Level {
     new Set(pinned).size !== pinned.length) {
     throw new Error('Pinned slots must be distinct in-range integers.');
   }
+  const { overflow = false, reserve = [], absences = [] } = value.rules ?? {};
+  if (typeof overflow !== 'boolean') throw new Error('Overflow must be a boolean.');
+  if (!Array.isArray(reserve) || !reserve.every(isWorker)) throw new Error('Reserve must contain valid workers.');
+  const ids = new Set([...workers, ...reserve].map((worker) => worker.id));
+  if (ids.size !== slots + reserve.length) throw new Error('Worker IDs across the crew and reserve must be unique.');
 
-  return { id, name, flavor, slots, workers, beats: parsedBeats, rules: { pinned }, allowedFaults };
+  const absenceKeys = new Set<string>();
+  if (!Array.isArray(absences)) throw new Error('Absences must be an array.');
+  const parsedAbsences = absences.map((absence: unknown) => {
+    if (!isRecord(absence) || !isIntegerInRange(absence.beat, 0, beats.length - 1) ||
+      typeof absence.workerId !== 'string' || !ids.has(absence.workerId)) {
+      throw new Error('Each absence needs an in-range beat and a known worker ID.');
+    }
+    const key = JSON.stringify([absence.beat, absence.workerId]);
+    if (absenceKeys.has(key)) throw new Error('Duplicate absence.');
+    absenceKeys.add(key);
+    return { beat: absence.beat, workerId: absence.workerId };
+  });
+
+  return {
+    id, name, flavor, slots, workers, beats: parsedBeats, allowedFaults,
+    rules: { pinned, overflow, reserve, absences: parsedAbsences },
+  };
 }
