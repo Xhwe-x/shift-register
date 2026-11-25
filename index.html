@@ -10,7 +10,7 @@
     <main id="shift-register" class="game-shell">
       <h1 class="sr-only">Shift Register / 交接班</h1>
       <section id="screen" hidden></section>
-      <div id="play">
+      <div id="play" role="region" tabindex="-1">
       <div>
         <div id="game" aria-hidden="true"></div>
         <p id="turn-message" aria-hidden="true"></p>
@@ -19,13 +19,13 @@
       <div id="controls" role="group" aria-label="Shift controls">
         <div class="primary-controls">
           <button type="button" data-command="SHIFT_LEFT" aria-keyshortcuts="ArrowLeft A">
-            <span aria-hidden="true">←</span> <span class="control-label">Left</span> <kbd>Left Shift</kbd>
+            <span aria-hidden="true">←</span> <span class="control-label">Left</span> <kbd>Left Shift / A</kbd>
           </button>
           <button type="button" data-command="WAIT" aria-keyshortcuts="Space ArrowDown S">
-            <span aria-hidden="true">•</span> <span class="control-label">Wait</span> <kbd>Space</kbd>
+            <span aria-hidden="true">•</span> <span class="control-label">Wait</span> <kbd>Space / S</kbd>
           </button>
           <button type="button" data-command="SHIFT_RIGHT" aria-keyshortcuts="ArrowRight D">
-            <span aria-hidden="true">→</span> <span class="control-label">Right</span> <kbd>Right Shift</kbd>
+            <span aria-hidden="true">→</span> <span class="control-label">Right</span> <kbd>Right Shift / D</kbd>
           </button>
         </div>
         <div class="secondary-controls">

@@ -59,13 +59,16 @@ export class PlayScene extends Phaser.Scene {
 
   create(): void {
     const t = words();
-    document.querySelector<HTMLElement>('#play')!.hidden = false;
+    const play = document.querySelector<HTMLElement>('#play')!;
+    const name = levelText(this.level).name;
+    play.hidden = false;
+    play.setAttribute('aria-label', name);
     this.scale.refresh();
     this.board = this.add.graphics();
     this.notices = this.add.container();
     this.label(44, 25, (t.factory + '  /  ' + t.night).toUpperCase(), 15, mint, true);
     this.label(40, 47, t.title.toUpperCase(), 51, ink, true);
-    this.label(44, 111, String(this.level.id).padStart(2, '0') + '  /  ' + levelText(this.level).name.toUpperCase(), 20, muted, true);
+    this.label(44, 111, String(this.level.id).padStart(2, '0') + '  /  ' + name.toUpperCase(), 20, muted, true);
     this.label(44, 144, t.boardIntro, 22);
     this.beatLabel = this.label(505, 111, '', 20, muted, true);
     this.faultLabel = this.label(916, 56, '', 21, muted, true).setOrigin(1, 0);
@@ -83,6 +86,8 @@ export class PlayScene extends Phaser.Scene {
 
     this.message = document.querySelector<HTMLElement>('#turn-message')!;
     const controller = new AbortController();
+    const focusPlay = () => play.focus({ preventScroll: true });
+    document.querySelector<HTMLElement>('#game')!.addEventListener('click', focusPlay, { signal: controller.signal });
     this.controls = new TouchButtons(
       document.querySelector<HTMLElement>('#controls')!,
       (command) => this.onCommand(command),
@@ -114,6 +119,7 @@ export class PlayScene extends Phaser.Scene {
     synth.setProgress(this.session.state.beatIndex / this.level.beats.length);
     synth.setActive(true);
     this.draw();
+    focusPlay();
     this.announce();
   }
 
@@ -194,7 +200,7 @@ export class PlayScene extends Phaser.Scene {
     const t = words();
     if (this.note) return this.note;
     if (isWon(this.level, state)) return format(t.wonStatus, { shifts: state.shifts, faults: state.faults });
-    if (isLost(this.level, state)) return t.lostStatus;
+    if (isLost(this.level, state)) return format(t.lostStatus, { faults: state.faults, limit: this.level.allowedFaults });
     if (!state.lastResult) return t.tips[this.level.id - 1] ?? t.boardIntro;
     if (!state.lastResult.faultSlots.length) return t.beatClear;
     return format(t.faultAt, { slots: state.lastResult.faultSlots.map((slot) => slot + 1).join(t.separator) });

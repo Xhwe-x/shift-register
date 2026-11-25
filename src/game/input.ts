@@ -19,16 +19,32 @@ const keyCommands = new Map<string, Command>([
   ['KeyH', 'HINT'],
 ]);
 
+export function commandForKey({ code, key, location }: Pick<KeyboardEvent, 'code' | 'key' | 'location'>): Command | undefined {
+  if (code && code !== 'Unidentified') return keyCommands.get(code);
+
+  // Some input methods report the key without a physical code.
+  if (/^[a-z]$/i.test(key)) return keyCommands.get('Key' + key.toUpperCase());
+  if (key === ' ') return 'WAIT';
+  if (key === 'Shift') {
+    if (location === 1) return 'SHIFT_LEFT';
+    if (location === 2) return 'SHIFT_RIGHT';
+  }
+  return keyCommands.get(key);
+}
+
 export function bindKeyboard(
   onCommand: (command: Command) => void, signal: AbortSignal, accepts: (command: Command) => boolean = () => true,
 ): void {
   window.addEventListener('keydown', (event) => {
     if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
-    const command = keyCommands.get(event.code);
+    const target = event.target;
+    if (target instanceof HTMLElement && (target.isContentEditable || target.closest('input, textarea, select'))) return;
+
+    const command = commandForKey(event);
     if (!command || !accepts(command)) return;
     event.preventDefault();
     if (!event.repeat) onCommand(command);
-  }, { signal });
+  }, { capture: true, signal });
 }
 
 export class TouchButtons {
@@ -44,7 +60,7 @@ export class TouchButtons {
     const labels: Record<Command, string> = {
       SHIFT_LEFT: t.left, SHIFT_RIGHT: t.right, WAIT: t.wait, UNDO: t.undo, RESTART: t.redo, HINT: t.hint,
     };
-    const keys = { SHIFT_LEFT: t.leftKey, SHIFT_RIGHT: t.rightKey, WAIT: t.space };
+    const keys = { SHIFT_LEFT: t.leftKey + ' / A', SHIFT_RIGHT: t.rightKey + ' / D', WAIT: t.space + ' / S' };
     root.setAttribute('aria-label', t.controls);
     for (const button of root.querySelectorAll<HTMLButtonElement>('button[data-command]')) {
       const command = button.dataset.command as Command;
@@ -60,7 +76,9 @@ export class TouchButtons {
       button.addEventListener('pointerleave', () => onPreview(null), { signal });
     }
 
-    bindKeyboard(onCommand, signal);
+    bindKeyboard((command) => {
+      if (!this.buttons.get(command)?.disabled) onCommand(command);
+    }, signal);
   }
 
   update(canAct: boolean, canUndo: boolean): void {

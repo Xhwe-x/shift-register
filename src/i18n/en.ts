@@ -45,7 +45,7 @@ export const en = {
   won: 'Shift complete',
   lost: 'Shift failed',
   wonStatus: 'Shift complete. {shifts} shifts, {faults} faults. View your timecard for par.',
-  lostStatus: 'Shift failed. Undo, restart, or view your timecard.',
+  lostStatus: 'Shift failed ({faults}/{limit} faults). Undo (Z) or restart (R) to play again.',
   beatClear: 'Beat clear. Check the next set of symbols.',
   faultAt: 'Fault at station(s) {slots}.',
   over: 'OFF DUTY',
@@ -73,7 +73,7 @@ export const en = {
   ending: 'The line is quiet. Go home, foreman.',
   skill: { wrench: 'repair', flame: 'heatproof', feather: 'lightweight', muscle: 'strength', eye: 'vision' },
   tips: [
-    'Shift right to wrap the last worker onto the eye machine.',
+    'Press D or tap Right to wrap the last worker onto the eye machine.',
     'The first beat is idle. Use it to get in position for beat two.',
     'Pinned workers stay put. Everyone else shifts past them.',
     'Two workers share a skill. Check which one can reach the next request.',

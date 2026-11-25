@@ -47,7 +47,7 @@ export const zh: typeof en = {
   won: '顺利交班',
   lost: '交班失败',
   wonStatus: '顺利交班。移位 {shifts} 次，故障 {faults} 次。查看打卡单可对比参考步数。',
-  lostStatus: '交班失败。可以悔棋、重开或查看打卡单。',
+  lostStatus: '交班失败。故障 {faults} 次，上限 {limit} 次。悔棋（Z）或重开（R）后可继续。',
   beatClear: '本拍正常。先看下一排图标，再决定怎么走。',
   faultAt: '故障工位为 {slots}。',
   over: '已下班',
@@ -75,7 +75,7 @@ export const zh: typeof en = {
   ending: '车间安静了。领班，回家吧。',
   skill: { wrench: '修理', flame: '耐热', feather: '轻盈', muscle: '大力', eye: '视觉' },
   tips: [
-    '先向右移，让最右侧工人绕回来，站到眼睛机器前。',
+    '先按 D 或点「右移」，让最右侧工人绕回来，站到眼睛机器前。',
     '第一拍没有需求。利用这一拍，为第二拍提前站位。',
     '固定工人留在原地，其他工人会跳过固定工位。',
     '有两位工人技能相同。看看谁能赶上下一拍的需求。',

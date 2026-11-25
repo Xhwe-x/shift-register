@@ -19,6 +19,10 @@ Tap the matching on-screen controls on touch devices. Hover over a move with a m
 
 触屏可直接点击对应按钮。鼠标悬停在动作按钮上可查看移动后的位置和机器匹配结果。使用提示后本局最高 2 星，悔棋不清除限制，重开会清除。主菜单可设置语言与减弱动画，关卡内可切换静音。
 
+If the game is embedded and the keyboard is focused elsewhere, click the game board to refocus it. If a shift has failed, undo with Z or restart with R.
+
+嵌入网页时，点击游戏棋盘可把键盘焦点切回游戏。交班失败后，可按 Z 悔棋或 R 重开。
+
 ## Local development / 本地开发
 
 Use Node.js 22.12+ and npm.

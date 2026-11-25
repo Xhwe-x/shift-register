@@ -24,6 +24,7 @@ new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  input: { keyboard: false },
   audio: { noAudio: true },
   scene: [BootScene, MenuScene, LevelSelectScene, PlayScene, ResultScene],
 });
