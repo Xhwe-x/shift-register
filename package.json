@@ -4,20 +4,24 @@
   "private": true,
   "type": "module",
   "license": "MIT",
-  "engines": { "node": ">=22.12.0" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "simulate": "tsx tools/simulate.ts",
-    "solve": "tsx tools/solve.ts"
+    "solve": "tsx tools/solve.ts",
+    "zip": "node tools/zip.mjs"
   },
   "dependencies": {
     "phaser": "3.90.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "fflate": "^0.8.2",
     "tsx": "^4.20.0",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",

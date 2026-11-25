@@ -7,6 +7,11 @@ function repeat(level: Level, action: Action) {
   return level.beats.reduce((state) => applyAction(level, state, action), createInitialState(level));
 }
 
+if (levels.length !== 10 || levels.some((level, index) => level.id !== index + 1)) {
+  console.error('Catalog must contain all ten levels in order.');
+  process.exitCode = 1;
+}
+
 for (const level of levels) {
   const solution = solveLevel(level, createInitialState(level));
   const failures: string[] = [];
