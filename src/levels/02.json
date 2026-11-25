@@ -1,0 +1,79 @@
+{
+  "id": 2,
+  "name": "Two Beats Ahead",
+  "flavor": "The foreman scheduled a break. It starts yesterday.",
+  "slots": 5,
+  "workers": [
+    {
+      "id": "w1",
+      "skill": "wrench"
+    },
+    {
+      "id": "w2",
+      "skill": "flame"
+    },
+    {
+      "id": "w3",
+      "skill": "feather"
+    },
+    {
+      "id": "w4",
+      "skill": "muscle"
+    },
+    {
+      "id": "w5",
+      "skill": "eye"
+    }
+  ],
+  "beats": [
+    [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      "muscle",
+      null,
+      null,
+      "flame",
+      null
+    ],
+    [
+      null,
+      "eye",
+      null,
+      null,
+      "feather"
+    ],
+    [
+      "eye",
+      null,
+      "flame",
+      null,
+      null
+    ],
+    [
+      null,
+      "wrench",
+      null,
+      "feather",
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      "flame",
+      "feather"
+    ]
+  ],
+  "rules": {
+    "pinned": [],
+    "overflow": false,
+    "reserve": [],
+    "absences": []
+  },
+  "allowedFaults": 1
+}

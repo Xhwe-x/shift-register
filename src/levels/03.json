@@ -1,0 +1,74 @@
+{
+  "id": 3,
+  "name": "Pinned Down",
+  "flavor": "Dave has become a permanent fixture. Payroll is looking into it.",
+  "slots": 5,
+  "workers": [
+    {
+      "id": "w1",
+      "skill": "wrench"
+    },
+    {
+      "id": "w2",
+      "skill": "flame"
+    },
+    {
+      "id": "w3",
+      "skill": "feather"
+    },
+    {
+      "id": "w4",
+      "skill": "muscle"
+    },
+    {
+      "id": "w5",
+      "skill": "eye"
+    }
+  ],
+  "beats": [
+    [
+      "eye",
+      null,
+      "feather",
+      null,
+      null
+    ],
+    [
+      null,
+      "wrench",
+      null,
+      null,
+      "muscle"
+    ],
+    [
+      "wrench",
+      null,
+      null,
+      null,
+      "eye"
+    ],
+    [
+      null,
+      "muscle",
+      null,
+      "eye",
+      null
+    ],
+    [
+      "wrench",
+      null,
+      "feather",
+      null,
+      null
+    ]
+  ],
+  "rules": {
+    "pinned": [
+      2
+    ],
+    "overflow": false,
+    "reserve": [],
+    "absences": []
+  },
+  "allowedFaults": 2
+}

@@ -40,6 +40,12 @@ export function parseLevel(value: unknown): Level {
     return beat;
   });
   if (!isIntegerInRange(allowedFaults, 0)) throw new Error('Fault allowance must be a non-negative integer.');
+  if (value.rules !== undefined && !isRecord(value.rules)) throw new Error('Level rules must be an object.');
+  const pinned = value.rules?.pinned ?? [];
+  if (!Array.isArray(pinned) || !pinned.every((slot) => isIntegerInRange(slot, 0, slots - 1)) ||
+    new Set(pinned).size !== pinned.length) {
+    throw new Error('Pinned slots must be distinct in-range integers.');
+  }
 
-  return { id, name, flavor, slots, workers, beats: parsedBeats, allowedFaults };
+  return { id, name, flavor, slots, workers, beats: parsedBeats, rules: { pinned }, allowedFaults };
 }

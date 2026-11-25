@@ -1,5 +1,9 @@
 import Phaser from 'phaser';
+import { BootScene } from './game/scenes/Boot';
+import { LevelSelectScene } from './game/scenes/LevelSelect';
+import { MenuScene } from './game/scenes/Menu';
 import { PlayScene } from './game/scenes/Play';
+import { ResultScene } from './game/scenes/Result';
 import './styles.css';
 
 new Phaser.Game({
@@ -13,5 +17,5 @@ new Phaser.Game({
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   audio: { noAudio: true },
-  scene: [PlayScene],
+  scene: [BootScene, MenuScene, LevelSelectScene, PlayScene, ResultScene],
 });

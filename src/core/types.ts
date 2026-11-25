@@ -18,6 +18,7 @@ export interface Level {
   readonly slots: number;
   readonly workers: readonly Worker[];
   readonly beats: readonly Beat[];
+  readonly rules: { readonly pinned: readonly number[] };
   readonly allowedFaults: number;
 }
 
@@ -35,5 +36,6 @@ export interface GameState {
   readonly crew: Crew;
   readonly faults: number;
   readonly shifts: number;
+  readonly reservePtr: number;
   readonly lastResult: BeatResult | null;
 }

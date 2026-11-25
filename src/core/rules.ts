@@ -6,6 +6,7 @@ export function createInitialState(level: Level): GameState {
     crew: [...level.workers],
     faults: 0,
     shifts: 0,
+    reservePtr: 0,
     lastResult: null,
   };
 }
@@ -40,13 +41,7 @@ export function applyAction(level: Level, state: GameState, action: Action): Gam
   const beat = level.beats[state.beatIndex];
   if (!beat || isLost(level, state)) return state;
 
-  const { crew } = state;
-  let nextCrew = crew;
-  if (action === 'SHIFT_LEFT') {
-    nextCrew = [...crew.slice(1), crew[0] ?? null];
-  } else if (action === 'SHIFT_RIGHT') {
-    nextCrew = [crew.at(-1) ?? null, ...crew.slice(0, -1)];
-  }
+  const nextCrew = action === 'WAIT' ? state.crew : rotate(level, state.crew, action);
 
   const lastResult = resolveBeat(nextCrew, beat, state.beatIndex);
   return {
@@ -54,6 +49,18 @@ export function applyAction(level: Level, state: GameState, action: Action): Gam
     crew: nextCrew,
     faults: state.faults + lastResult.faultSlots.length,
     shifts: state.shifts + Number(action !== 'WAIT'),
+    reservePtr: state.reservePtr,
     lastResult,
   };
+}
+
+function rotate(level: Level, crew: Crew, action: Exclude<Action, 'WAIT'>): Crew {
+  const indices = crew.flatMap((_, slot) => level.rules.pinned.includes(slot) ? [] : [slot]);
+  const movable = indices.map((slot) => crew[slot] ?? null);
+  const next = [...crew];
+  const delta = action === 'SHIFT_LEFT' ? 1 : -1;
+  indices.forEach((slot, index) => {
+    next[slot] = movable[(index + delta + movable.length) % movable.length] ?? null;
+  });
+  return next;
 }

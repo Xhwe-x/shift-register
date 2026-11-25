@@ -10,7 +10,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "simulate": "tsx tools/simulate.ts"
+    "simulate": "tsx tools/simulate.ts",
+    "solve": "tsx tools/solve.ts"
   },
   "dependencies": {
     "phaser": "3.90.0"

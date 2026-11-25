@@ -1,10 +1,13 @@
 import Phaser from 'phaser';
 import { applyAction, isLost, isWon } from '../../core/rules';
+import { recordWin } from '../../core/progress';
+import { starsFor } from '../../core/scoring';
 import { ShiftSession } from '../../core/session';
 import type { Action, Beat, Crew, Level } from '../../core/types';
 import { tutorialLevel } from '../../levels';
 import { TouchButtons } from '../input';
 import type { Command } from '../input';
+import { getProgress, saveProgress } from '../storage';
 import { drawBadge, skillColors } from '../ui/skills';
 
 const ink = '#ecf5ff';
@@ -25,6 +28,7 @@ export class PlayScene extends Phaser.Scene {
   private beatLabel!: Phaser.GameObjects.Text;
   private faultLabel!: Phaser.GameObjects.Text;
   private message!: HTMLElement;
+  private report!: HTMLButtonElement;
 
   constructor() {
     super('Play');
@@ -34,13 +38,19 @@ export class PlayScene extends Phaser.Scene {
     return this.session.level;
   }
 
+  init({ level, session }: { level?: Level; session?: ShiftSession }): void {
+    this.session = session ?? new ShiftSession(level ?? tutorialLevel);
+  }
+
   create(): void {
+    document.querySelector<HTMLElement>('#play')!.hidden = false;
+    this.scale.refresh();
     this.board = this.add.graphics();
     this.label(44, 25, 'DREAM FACTORY  /  NIGHT SHIFT', 15, mint, true);
     this.label(40, 47, 'SHIFT REGISTER', 51, ink, true);
-    this.label(44, 111, '01  /  ' + this.level.name.toUpperCase(), 20, muted, true);
+    this.label(44, 111, String(this.level.id).padStart(2, '0') + '  /  ' + this.level.name.toUpperCase(), 20, muted, true);
     this.label(44, 144, 'Move the whole crew one slot. Match each lit machine’s symbol.', 22);
-    this.beatLabel = this.label(295, 111, '', 20, muted, true);
+    this.beatLabel = this.label(505, 111, '', 20, muted, true);
     this.faultLabel = this.label(916, 56, '', 21, muted, true).setOrigin(1, 0);
     this.label(64, 212, 'IN 2 BEATS', 16, muted, true).setOrigin(0, 0.5);
     this.label(64, 263, 'NEXT BEAT', 16, muted, true).setOrigin(0, 0.5);
@@ -49,7 +59,8 @@ export class PlayScene extends Phaser.Scene {
     this.label(64, 511, 'CREW', 16, muted, true).setOrigin(0, 0.5);
 
     for (let slot = 0; slot < this.level.slots; slot += 1) {
-      this.label(this.columnX(slot), 446, '0' + (slot + 1), 14, muted, true).setOrigin(0.5, 0);
+      const pinned = this.level.rules.pinned.includes(slot);
+      this.label(this.columnX(slot), 446, '0' + (slot + 1) + (pinned ? ' · PIN' : ''), 14, pinned ? mint : muted, true).setOrigin(0.5, 0);
     }
 
     this.message = document.querySelector<HTMLElement>('#turn-message')!;
@@ -61,6 +72,11 @@ export class PlayScene extends Phaser.Scene {
       controller.signal,
     );
     this.status = document.querySelector<HTMLElement>('#turn-status')!;
+    this.report = document.querySelector<HTMLButtonElement>('#view-report')!;
+    this.report.addEventListener('click', () => this.scene.start('Result', { session: this.session }), { signal: controller.signal });
+    document.querySelector<HTMLButtonElement>('#choose-shift')!.addEventListener(
+      'click', () => this.scene.start('LevelSelect'), { signal: controller.signal },
+    );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => controller.abort());
     this.draw();
     this.announce();
@@ -80,6 +96,7 @@ export class PlayScene extends Phaser.Scene {
   }
 
   private onCommand(command: Command): void {
+    const before = this.session.state;
     switch (command) {
       case 'UNDO':
         this.session.undo();
@@ -90,6 +107,12 @@ export class PlayScene extends Phaser.Scene {
       default:
         this.session.act(command);
     }
+    const after = this.session.state;
+    if (after !== before && isWon(this.level, after)) {
+      const progress = getProgress();
+      const next = recordWin(progress, this.level.id, { stars: starsFor(after.faults), faults: after.faults, shifts: after.shifts });
+      if (next !== progress) saveProgress(next);
+    }
     this.draw();
     this.announce();
   }
@@ -98,7 +121,11 @@ export class PlayScene extends Phaser.Scene {
     const { state } = this.session;
     if (isWon(this.level, state)) return 'Shift complete. ' + state.shifts + ' shifts, ' + state.faults + ' faults.';
     if (isLost(this.level, state)) return 'Shift failed. Undo or restart to try again.';
-    if (!state.lastResult) return 'Shift right to wrap the last worker to the first station.';
+    if (!state.lastResult) {
+      if (this.level.id === 1) return 'Shift right to wrap the last worker to the first station.';
+      if (this.level.id === 2) return 'The first beat is idle. Use it to prepare for the next one.';
+      return 'Pinned crew stay put. The other workers shift past them.';
+    }
     if (!state.lastResult.faultSlots.length) return 'Beat clear. Check the next set of symbols before moving.';
     return 'Fault at station ' + state.lastResult.faultSlots.map((slot) => slot + 1).join(', ') + '.';
   }
@@ -170,6 +197,7 @@ export class PlayScene extends Phaser.Scene {
 
     this.drawCrew(projection?.crew ?? state.crew);
     this.controls.update(active, this.session.canUndo);
+    this.report.hidden = active;
     const previewMessage = projection?.lastResult
       ? 'Preview  /  ' + projection.lastResult.matchedSlots.length + ' matches, ' + projection.lastResult.faultSlots.length + ' faults.'
       : null;
