@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090e20" />
+    <title>Shift Register（交接班）</title>
+  </head>
+  <body>
+    <main id="shift-register" class="game-shell">
+      <h1 class="sr-only">Shift Register / 交接班</h1>
+      <div>
+        <div id="game" aria-hidden="true"></div>
+        <p id="turn-message" aria-hidden="true"></p>
+      </div>
+      <p id="turn-status" class="sr-only" role="status"></p>
+      <div id="controls" role="group" aria-label="Shift controls">
+        <div class="primary-controls">
+          <button type="button" data-command="SHIFT_LEFT" aria-keyshortcuts="ArrowLeft A">
+            <span aria-hidden="true">←</span> Left <kbd>Left Shift</kbd>
+          </button>
+          <button type="button" data-command="WAIT" aria-keyshortcuts="Space ArrowDown S">
+            <span aria-hidden="true">•</span> Wait <kbd>Space</kbd>
+          </button>
+          <button type="button" data-command="SHIFT_RIGHT" aria-keyshortcuts="ArrowRight D">
+            <span aria-hidden="true">→</span> Right <kbd>Right Shift</kbd>
+          </button>
+        </div>
+        <div class="secondary-controls">
+          <button type="button" data-command="UNDO" aria-keyshortcuts="Z Backspace" disabled>Undo <kbd>Z</kbd></button>
+          <button type="button" data-command="RESTART" aria-keyshortcuts="R">Restart <kbd>R</kbd></button>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

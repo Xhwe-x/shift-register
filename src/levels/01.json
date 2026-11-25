@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "name": "Clock In",
+  "flavor": "The foreman was about to go home. That was three night shifts ago.",
+  "slots": 5,
+  "workers": [
+    { "id": "w1", "skill": "wrench" },
+    { "id": "w2", "skill": "flame" },
+    { "id": "w3", "skill": "feather" },
+    { "id": "w4", "skill": "muscle" },
+    { "id": "w5", "skill": "eye" }
+  ],
+  "beats": [
+    ["eye", "wrench", null, null, null],
+    ["eye", null, "flame", null, null],
+    [null, "flame", null, null, "eye"]
+  ],
+  "rules": { "pinned": [], "overflow": false, "reserve": [], "absences": [] },
+  "allowedFaults": 1
+}
