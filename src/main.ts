@@ -5,8 +5,13 @@ import { LevelSelectScene } from './game/scenes/LevelSelect';
 import { MenuScene } from './game/scenes/Menu';
 import { PlayScene } from './game/scenes/Play';
 import { ResultScene } from './game/scenes/Result';
+import { getSettings } from './game/settings';
+import { setLanguage } from './i18n';
 import './styles.css';
 
+const preferences = getSettings();
+setLanguage(preferences.language);
+synth.setMuted(preferences.muted);
 synth.install();
 
 new Phaser.Game({

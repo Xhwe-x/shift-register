@@ -25,6 +25,13 @@ export abstract class ScreenScene extends Phaser.Scene {
     return screen;
   }
 
+  protected heading(screen: HTMLElement, label: string): HTMLHeadingElement {
+    const title = node(screen, 'h2', label);
+    title.tabIndex = -1;
+    title.focus({ preventScroll: true });
+    return title;
+  }
+
   protected button(parent: HTMLElement, label: string, callback: () => void, primary = false): HTMLButtonElement {
     const button = node(parent, 'button', label, primary ? 'accent-button' : undefined);
     button.type = 'button';

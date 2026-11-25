@@ -7,8 +7,10 @@ import { ShiftSession } from '../../core/session';
 import { solveLevel } from '../../core/solver';
 import type { Action, Beat, Crew, GameState, Level, Worker } from '../../core/types';
 import { tutorialLevel } from '../../levels';
+import { format, levelText, words } from '../../i18n';
 import { TouchButtons } from '../input';
 import type { Command } from '../input';
+import { reduceMotion, saveSetting } from '../settings';
 import { getProgress, saveProgress } from '../storage';
 import { drawBadge, skillColors } from '../ui/skills';
 
@@ -27,8 +29,6 @@ interface TurnFrame {
   readonly action: Action;
   readonly progress: number;
 }
-
-const moveName: Record<Action, string> = { SHIFT_LEFT: 'Left', SHIFT_RIGHT: 'Right', WAIT: 'Wait' };
 
 export class PlayScene extends Phaser.Scene {
   private session = new ShiftSession(tutorialLevel);
@@ -58,26 +58,27 @@ export class PlayScene extends Phaser.Scene {
   }
 
   create(): void {
+    const t = words();
     document.querySelector<HTMLElement>('#play')!.hidden = false;
     this.scale.refresh();
     this.board = this.add.graphics();
     this.notices = this.add.container();
-    this.label(44, 25, 'DREAM FACTORY  /  NIGHT SHIFT', 15, mint, true);
-    this.label(40, 47, 'SHIFT REGISTER', 51, ink, true);
-    this.label(44, 111, String(this.level.id).padStart(2, '0') + '  /  ' + this.level.name.toUpperCase(), 20, muted, true);
-    this.label(44, 144, 'Move the whole crew one slot. Match each lit machine’s symbol.', 22);
+    this.label(44, 25, (t.factory + '  /  ' + t.night).toUpperCase(), 15, mint, true);
+    this.label(40, 47, t.title.toUpperCase(), 51, ink, true);
+    this.label(44, 111, String(this.level.id).padStart(2, '0') + '  /  ' + levelText(this.level).name.toUpperCase(), 20, muted, true);
+    this.label(44, 144, t.boardIntro, 22);
     this.beatLabel = this.label(505, 111, '', 20, muted, true);
     this.faultLabel = this.label(916, 56, '', 21, muted, true).setOrigin(1, 0);
-    this.label(64, 212, 'IN 2 BEATS', 16, muted, true).setOrigin(0, 0.5);
-    this.label(64, 263, 'NEXT BEAT', 16, muted, true).setOrigin(0, 0.5);
-    this.label(64, 320, 'RUN THIS BEAT', 16, mint, true).setOrigin(0, 0.5);
-    this.label(64, 410, 'MACHINES', 16, muted, true).setOrigin(0, 0.5);
-    this.label(64, 511, 'CREW', 16, muted, true).setOrigin(0, 0.5);
-    if (this.level.rules.overflow) this.label(64, 570, 'RESERVE', 16, muted, true).setOrigin(0, 0.5);
+    this.label(64, 212, t.laterBeat, 16, muted, true).setOrigin(0, 0.5);
+    this.label(64, 263, t.nextBeat, 16, muted, true).setOrigin(0, 0.5);
+    this.label(64, 320, t.runBeat, 16, mint, true).setOrigin(0, 0.5);
+    this.label(64, 410, t.machineRow, 16, muted, true).setOrigin(0, 0.5);
+    this.label(64, 511, t.crew, 16, muted, true).setOrigin(0, 0.5);
+    if (this.level.rules.overflow) this.label(64, 570, t.reserve, 16, muted, true).setOrigin(0, 0.5);
 
     for (let slot = 0; slot < this.level.slots; slot += 1) {
       const pinned = this.level.rules.pinned.includes(slot);
-      this.label(this.columnX(slot), 446, '0' + (slot + 1) + (pinned ? ' · PIN' : ''), 14, pinned ? mint : muted, true).setOrigin(0.5, 0);
+      this.label(this.columnX(slot), 446, '0' + (slot + 1) + (pinned ? ' · ' + t.pin : ''), 14, pinned ? mint : muted, true).setOrigin(0.5, 0);
     }
 
     this.message = document.querySelector<HTMLElement>('#turn-message')!;
@@ -90,17 +91,22 @@ export class PlayScene extends Phaser.Scene {
     );
     this.status = document.querySelector<HTMLElement>('#turn-status')!;
     this.report = document.querySelector<HTMLButtonElement>('#view-report')!;
+    this.report.textContent = t.report;
     this.report.addEventListener('click', () => this.scene.start('Result', { session: this.session }), { signal: controller.signal });
-    document.querySelector<HTMLButtonElement>('#choose-shift')!.addEventListener(
-      'click', () => this.scene.start('LevelSelect'), { signal: controller.signal },
-    );
+    const choose = document.querySelector<HTMLButtonElement>('#choose-shift')!;
+    choose.textContent = t.shifts;
+    choose.addEventListener('click', () => this.scene.start('LevelSelect'), { signal: controller.signal });
     const mute = document.querySelector<HTMLButtonElement>('#toggle-audio')!;
     const updateMute = () => {
-      mute.textContent = synth.isMuted ? 'Unmute' : 'Mute';
+      mute.textContent = synth.isMuted ? t.unmute : t.mute;
       mute.setAttribute('aria-pressed', String(synth.isMuted));
     };
     updateMute();
-    mute.addEventListener('click', () => { synth.setMuted(!synth.isMuted); updateMute(); }, { signal: controller.signal });
+    mute.addEventListener('click', () => {
+      synth.setMuted(!synth.isMuted);
+      saveSetting({ muted: synth.isMuted });
+      updateMute();
+    }, { signal: controller.signal });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       controller.abort();
       synth.setActive(false);
@@ -114,7 +120,7 @@ export class PlayScene extends Phaser.Scene {
   private label(x: number, y: number, value: string, size: number, color = ink, bold = false): Phaser.GameObjects.Text {
     return this.add.text(x, y, value, {
       color,
-      fontFamily: bold ? 'Consolas, monospace' : 'system-ui, sans-serif',
+      fontFamily: bold ? 'Consolas, Microsoft YaHei, PingFang SC, monospace' : 'system-ui, sans-serif',
       fontSize: size,
       fontStyle: bold ? 'bold' : 'normal',
     });
@@ -140,8 +146,9 @@ export class PlayScene extends Phaser.Scene {
         if (isWon(this.level, before) || isLost(this.level, before)) break;
         this.session.useHint();
         const action = solveLevel(this.level, before)?.actions[0];
-        this.note = action ? 'Hint  /  ' + moveName[action] + ' next. This run is capped at 2 stars.'
-          : 'No winning move from here. Undo or restart to try another path.';
+        const t = words();
+        const moveName: Record<Action, string> = { SHIFT_LEFT: t.left, SHIFT_RIGHT: t.right, WAIT: t.wait };
+        this.note = action ? format(t.hintNext, { action: moveName[action] }) : t.hintNone;
         break;
       }
       default:
@@ -160,7 +167,7 @@ export class PlayScene extends Phaser.Scene {
     if (command !== 'UNDO' && command !== 'RESTART' && command !== 'HINT' && after !== before && after.lastResult) {
       synth.turn(command, after.lastResult, won);
       const fault = after.lastResult.faultSlots.length > 0;
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && (command !== 'WAIT' || fault)) {
+      if (!reduceMotion() && (command !== 'WAIT' || fault || after.lastResult.matchedSlots.length > 0)) {
         if (fault) this.cameras.main.shake(170, 0.0027);
         this.transition = this.tweens.addCounter({
           from: 0,
@@ -184,38 +191,43 @@ export class PlayScene extends Phaser.Scene {
 
   private describe(): string {
     const { state } = this.session;
+    const t = words();
     if (this.note) return this.note;
-    if (isWon(this.level, state)) return 'Shift complete. ' + state.shifts + ' shifts, ' + state.faults + ' faults.';
-    if (isLost(this.level, state)) return 'Shift failed. Undo or restart to try again.';
-    if (!state.lastResult) {
-      if (this.level.id === 1) return 'Shift right to wrap the last worker to the first station.';
-      if (this.level.id === 2) return 'The first beat is idle. Use it to prepare for the next one.';
-      if (this.level.id === 5 || this.level.id === 6) return 'A worker pushed off the belt leaves. Reserve workers fill the gap in order.';
-      if (this.level.id === 7 || this.level.id === 8) return 'Workers marked OFF cannot fill a request on their listed beat.';
-      return 'Pinned crew stay put. The other workers shift past them.';
-    }
-    if (!state.lastResult.faultSlots.length) return 'Beat clear. Check the next set of symbols before moving.';
-    return 'Fault at station ' + state.lastResult.faultSlots.map((slot) => slot + 1).join(', ') + '.';
+    if (isWon(this.level, state)) return format(t.wonStatus, { shifts: state.shifts, faults: state.faults });
+    if (isLost(this.level, state)) return t.lostStatus;
+    if (!state.lastResult) return t.tips[this.level.id - 1] ?? t.boardIntro;
+    if (!state.lastResult.faultSlots.length) return t.beatClear;
+    return format(t.faultAt, { slots: state.lastResult.faultSlots.map((slot) => slot + 1).join(t.separator) });
   }
 
   private announce(): void {
     const { state } = this.session;
+    const t = words();
     const beat = this.level.beats[state.beatIndex];
     const gameOver = isLost(this.level, state) || isWon(this.level, state);
-    this.status.textContent = this.describe() + (beat && !gameOver
-      ? ' Beat ' + (state.beatIndex + 1) + ' of ' + this.level.beats.length
-        + '. Workers from left to right are ' + state.crew.map((worker) => worker?.skill ?? 'empty').join(', ')
-        + '. Machine demands from left to right are ' + beat.map((skill) => skill ?? 'idle').join(', ') + '.'
-        + this.level.rules.absences.filter((absence) => absence.beat >= state.beatIndex && absence.beat < state.beatIndex + 3)
-          .map((absence) => {
-            const slot = state.crew.findIndex((worker) => worker?.id === absence.workerId);
-            return slot < 0 ? '' : ' Worker at station ' + (slot + 1) + ' is off on beat ' + (absence.beat + 1) + '.';
-          }).join('')
-      : '');
+    const lines = [this.describe()];
+    if (beat && !gameOver) {
+      const reserve = this.level.rules.reserve.slice(state.reservePtr);
+      lines.push(
+        format(t.audienceBeat, { value: state.beatIndex + 1, total: this.level.beats.length }),
+        format(t.audienceCrew, { skills: state.crew.map((worker) => worker ? t.skill[worker.skill] : t.vacant).join(t.separator) }),
+        format(t.audienceDemand, { skills: beat.map((skill) => skill ? t.skill[skill] : t.idle).join(t.separator) }),
+      );
+      if (reserve.length) lines.push(format(t.audienceReserve, { skills: reserve.map((worker) => t.skill[worker.skill]).join(t.separator) }));
+      for (const absence of this.level.rules.absences) {
+        if (absence.beat < state.beatIndex || absence.beat >= state.beatIndex + 3) continue;
+        const slot = state.crew.findIndex((worker) => worker?.id === absence.workerId);
+        const queue = reserve.findIndex((worker) => worker.id === absence.workerId);
+        if (slot >= 0) lines.push(format(t.audienceOff, { slot: slot + 1, beat: absence.beat + 1 }));
+        else if (queue >= 0) lines.push(format(t.audienceReserveOff, { slot: queue + 1, beat: absence.beat + 1 }));
+      }
+    }
+    this.status.textContent = lines.join('');
   }
 
   private draw(action: Action | null = null, frame?: TurnFrame): void {
     const { level, state } = this.session;
+    const t = words();
     const lost = isLost(level, state);
     const won = isWon(level, state);
     const active = !lost && !won;
@@ -227,8 +239,8 @@ export class PlayScene extends Phaser.Scene {
     g.clear();
     this.notices.removeAll(true);
 
-    this.beatLabel.setText('BEAT ' + Math.min(state.beatIndex + 1, level.beats.length) + ' / ' + level.beats.length);
-    this.faultLabel.setText('FAULTS ' + state.faults + ' / ' + level.allowedFaults).setColor(lost ? red : muted);
+    this.beatLabel.setText(format(t.beat, { value: shownBeat + 1, total: level.beats.length }) + (!active && !frame ? ' · ' + t.over : ''));
+    this.faultLabel.setText(format(t.faults, { value: state.faults, total: level.allowedFaults })).setColor(lost ? red : muted);
     g.fillStyle(border).fillRoundedRect(809, 88, 107, 5, 2);
     const meter = Math.min(1, state.faults / Math.max(1, level.allowedFaults));
     if (meter > 0) g.fillStyle(lost ? 0xff8e96 : 0xf9d87a).fillRoundedRect(809, 88, 107 * meter, 5, 2);
@@ -271,18 +283,28 @@ export class PlayScene extends Phaser.Scene {
         g.lineStyle(2, edge).lineBetween(x + 28, 427, x + 36, 435).lineBetween(x + 36, 427, x + 28, 435);
       } else if (matched) {
         g.lineStyle(2, edge).lineBetween(x + 27, 431, x + 30, 435).lineBetween(x + 30, 435, x + 37, 427);
+        if (frame) this.drawSparks(x, frame.progress);
       }
     }
 
     this.drawCrew(crew, shownBeat, active && !frame, frame);
-    if (level.rules.overflow) this.drawReserve(projection?.reservePtr ?? state.reservePtr);
+    if (level.rules.overflow) this.drawReserve(projection?.reservePtr ?? state.reservePtr, shownBeat);
     this.controls.update(active, this.session.canUndo);
     this.report.hidden = active;
     const previewMessage = projection?.lastResult
-      ? 'Preview  /  ' + projection.lastResult.matchedSlots.length + ' matches, ' + projection.lastResult.faultSlots.length + ' faults.'
+      ? format(t.preview, { matches: projection.lastResult.matchedSlots.length, faults: projection.lastResult.faultSlots.length })
       : null;
     this.message.textContent = previewMessage ?? this.describe();
     this.message.dataset.outcome = lost ? 'lost' : won ? 'won' : 'active';
+  }
+
+  private drawSparks(x: number, progress: number): void {
+    for (let particle = 0; particle < 5; particle += 1) {
+      const direction = -Math.PI * (particle + 1) / 6;
+      const travel = 18 + progress * (25 + particle * 4);
+      this.board.fillStyle(0x61ebd2, (1 - progress) * Math.sin(Math.PI * progress) * 1.8)
+        .fillRect(x + Math.cos(direction) * travel, 386 + Math.sin(direction) * travel, 3, 3);
+    }
   }
 
   private drawBeat(beat: Beat | undefined, y: number, offset: number, crew: Crew, beatIndex: number): void {
@@ -319,16 +341,18 @@ export class PlayScene extends Phaser.Scene {
     g.fillStyle(0x111b34).fillCircle(x, y + 4, 1);
   }
 
-  private drawReserve(reservePtr: number): void {
+  private drawReserve(reservePtr: number, beatIndex: number): void {
     const reserve = this.level.rules.reserve.slice(reservePtr);
     if (reserve.length === 0) {
-      this.notices.add(this.label(columnStart + 6, 570, 'EMPTY', 14, muted, true).setOrigin(0, 0.5));
+      this.notices.add(this.label(columnStart + 6, 570, words().empty, 14, muted, true).setOrigin(0, 0.5));
       return;
     }
     reserve.forEach((worker, index) => {
       const x = columnStart + 19 + index * 43;
       this.board.fillStyle(0x192844).fillRoundedRect(x - 16, 557, 32, 26, 4);
       drawBadge(this.board, worker.skill, x, 570, 10);
+      const off = this.offIn(worker, beatIndex);
+      if (off < 3) this.drawWarning(x + 14, 561);
     });
   }
 
@@ -345,7 +369,8 @@ export class PlayScene extends Phaser.Scene {
       const off = this.offIn(worker, beatIndex);
       if (active && Number.isFinite(off)) {
         g.fillStyle(0x3b2e25).fillRoundedRect(x - 36, 533, 72, 21, 4);
-        this.notices.add(this.label(x, 543, off === 0 ? 'OFF NOW' : 'OFF in ' + off, 13, '#f9d87a', true).setOrigin(0.5));
+        const t = words();
+        this.notices.add(this.label(x, 543, off === 0 ? t.offNow : format(t.offSoon, { value: off }), 13, '#f9d87a', true).setOrigin(0.5));
       }
     });
   }

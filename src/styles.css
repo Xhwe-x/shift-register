@@ -65,7 +65,7 @@ button {
 }
 
 .primary-controls button { flex: 1; }
-.primary-controls button span { color: #61ebd2; font-size: 1.15em; }
+.primary-controls button span[aria-hidden="true"] { color: #61ebd2; font-size: 1.15em; }
 button:focus-visible { outline: 2px solid #61ebd2; outline-offset: 2px; }
 button:hover:not(:disabled) { background: #243957; border-color: #61ebd2; }
 button:active:not(:disabled) { background: #30546a; }
@@ -114,11 +114,29 @@ kbd {
 }
 
 #screen h2 {
-  font-family: Consolas, monospace;
+  font-family: Consolas, "Microsoft YaHei", "PingFang SC", monospace;
   font-size: clamp(2rem, 7vw, 4rem);
   line-height: 1.05;
   margin: 12px 0;
 }
+
+.menu-line {
+  display: flex;
+  gap: clamp(12px, 4vw, 28px);
+  align-items: center;
+  width: fit-content;
+  min-height: 54px;
+  padding: 8px clamp(10px, 4vw, 20px);
+  border-block: 1px solid #394f76;
+  background: #0a142b;
+}
+
+.menu-line span { width: clamp(19px, 7vw, 38px); aspect-ratio: 1; }
+.menu-line .wrench { background: #61ebd2; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
+.menu-line .flame { background: #ffa477; clip-path: polygon(50% 0, 100% 94%, 0 94%); }
+.menu-line .feather { background: #b8a4ff; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.menu-line .muscle { background: #f9d87a; border-radius: 18%; }
+.menu-line .eye { background: #7fb9ff; border-radius: 50%; }
 
 .machine-label { color: #61ebd2; font: bold 0.85rem Consolas, monospace; letter-spacing: 0.08em; }
 .screen-intro { color: #b8cbe7; max-width: 36em; line-height: 1.5; }
@@ -129,7 +147,47 @@ kbd {
 .shift-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 8px; margin: 24px 0; }
 .shift-grid button { flex-direction: column; align-items: flex-start; min-height: 88px; text-align: start; }
 .shift-best { color: #b8cbe7; font-size: 0.82rem; }
-.report-stars { color: #f9d87a; font-size: 1.5rem; font-weight: bold; }
+.game-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 24px 0 0;
+  padding: 8px 12px 10px;
+  border: 1px solid #3a537c;
+  border-radius: 8px;
+}
+
+.game-settings label { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.game-settings select { min-height: 44px; padding: 4px 6px; font: inherit; }
+.game-settings [type="checkbox"] { width: 20px; height: 20px; accent-color: #61ebd2; }
+.game-settings :focus-visible { outline: 2px solid #61ebd2; outline-offset: 2px; }
+
+.timecard {
+  padding: clamp(14px, 4vw, 32px);
+  color: #172547;
+  background: #e7e6d5;
+  border-top: 4px solid #57a996;
+  border-bottom: 3px dashed #142441;
+  border-radius: 8px 8px 2px 2px;
+}
+
+.timecard[data-outcome="lost"] { border-top-color: #b94863; }
+.timecard .machine-label { color: #40536c; }
+.report-stars { margin: 12px 0; color: #805000; letter-spacing: 0.18em; font-size: 1.5rem; }
+.timecard-stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 18px 0 10px; border-block: 1px dashed #78839b; }
+.timecard-stats div { padding: 8px 2px; }
+.timecard-stats dt { color: #415270; font-size: 0.82rem; }
+.timecard-stats dd { margin: 3px 0 0; font: 700 clamp(1.2rem, 5vw, 1.8rem) Consolas, monospace; }
+.par-result, .timecard-note { margin-block: 10px 0; }
+.timecard-note { color: #40536c; }
+.assist-stamp {
+  width: fit-content;
+  margin-block: 12px 0;
+  padding: 4px 8px;
+  color: #86344a;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
 
 .sr-only {
   position: absolute;
